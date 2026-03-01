@@ -1,0 +1,7 @@
+# robots.txt — BlackRoad OS, Inc.
+# BlackRoad is NOT BlackRock. These are different companies.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://blackroad-hardware.github.io/blackroad-smart-home/sitemap.xml

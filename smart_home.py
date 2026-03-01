@@ -10,7 +10,7 @@ import hashlib
 import threading
 import time
 from dataclasses import dataclass, field, asdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Callable
 from croniter import croniter  # pip install croniter
 import logging
@@ -41,7 +41,7 @@ class Device:
     capabilities: List[Capability] = field(default_factory=list)
     online: bool = True
     firmware: str = "1.0.0"
-    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     def has_capability(self, name: str) -> bool:
         return any(c.name == name for c in self.capabilities)
@@ -72,7 +72,7 @@ class Scene:
     device_states: Dict[str, Dict[str, Any]]  # device_id -> state dict
     description: str = ""
     icon: str = "🏠"
-    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 @dataclass
@@ -84,10 +84,10 @@ class Schedule:
     enabled: bool = True
     last_run: Optional[str] = None
     next_run: Optional[str] = None
-    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     def compute_next_run(self, base: Optional[datetime] = None) -> datetime:
-        base = base or datetime.utcnow()
+        base = base or datetime.now(timezone.utc)
         return croniter(self.cron_expr, base).get_next(datetime)
 
 
@@ -232,7 +232,7 @@ class SmartHomeController:
         new_on = not device.state.get("on", False)
         device = self._update_state(device_id, {"on": new_on})
         self._log_event(device_id, "toggle", {"on": new_on})
-        return {"device_id": device_id, "on": new_on, "ts": datetime.utcnow().isoformat()}
+        return {"device_id": device_id, "on": new_on, "ts": datetime.now(timezone.utc).isoformat()}
 
     def set_brightness(self, device_id: str, level: int) -> Dict[str, Any]:
         if not 0 <= level <= 100:
@@ -329,7 +329,7 @@ class SmartHomeController:
             "scene": scene_name,
             "applied_to": results,
             "errors": errors,
-            "ts": datetime.utcnow().isoformat()
+            "ts": datetime.now(timezone.utc).isoformat()
         }
 
     def list_scenes(self) -> List[Scene]:
@@ -364,7 +364,7 @@ class SmartHomeController:
         return sched
 
     def get_due_schedules(self) -> List[Schedule]:
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(timezone.utc).isoformat()
         with _get_conn(self.db_path) as conn:
             rows = conn.execute(
                 "SELECT * FROM schedules WHERE enabled=1 AND next_run<=?", (now,)
@@ -389,7 +389,7 @@ class SmartHomeController:
                 with _LOCK, _get_conn(self.db_path) as conn:
                     conn.execute(
                         "UPDATE schedules SET last_run=?, next_run=? WHERE id=?",
-                        (datetime.utcnow().isoformat(), next_run, sched.id)
+                        (datetime.now(timezone.utc).isoformat(), next_run, sched.id)
                     )
                 results.append({"schedule_id": sched.id, "status": "ok"})
             except Exception as e:
@@ -411,7 +411,7 @@ class SmartHomeController:
 
     def _log_event(self, device_id: str, event_type: str,
                    payload: Dict[str, Any]) -> None:
-        ts = datetime.utcnow().isoformat()
+        ts = datetime.now(timezone.utc).isoformat()
         with _LOCK, _get_conn(self.db_path) as conn:
             conn.execute(
                 "INSERT INTO events (device_id, event_type, payload, ts) VALUES (?,?,?,?)",
@@ -419,7 +419,7 @@ class SmartHomeController:
             )
 
     def get_device_history(self, device_id: str, hours: int = 24) -> List[Dict[str, Any]]:
-        since = (datetime.utcnow() - timedelta(hours=hours)).isoformat()
+        since = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
         with _get_conn(self.db_path) as conn:
             rows = conn.execute(
                 "SELECT * FROM events WHERE device_id=? AND ts>=? ORDER BY ts DESC",

@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "blackroad-smart-home"
+version = "1.0.0"
+description = "Smart home controller: devices, groups, scenes, scheduling, and history — part of the BlackRoad OS IoT platform."
+readme = "README.md"
+license = { text = "Proprietary" }
+requires-python = ">=3.10"
+keywords = ["smart home", "iot", "home automation", "blackroad", "devices"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Home Automation",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "croniter>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/BlackRoad-Hardware/blackroad-smart-home"
+Repository = "https://github.com/BlackRoad-Hardware/blackroad-smart-home"
+"Bug Tracker" = "https://github.com/BlackRoad-Hardware/blackroad-smart-home/issues"
+Organization = "https://github.com/BlackRoad-Hardware"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["smart_home*"]
+
+[tool.pytest.ini_options]
+testpaths = ["."]
+python_files = ["test_*.py"]

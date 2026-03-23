@@ -1,5 +1,13 @@
 # blackroad-smart-home
 
+> Smart home controller - device management, scenes, scheduling
+
+Part of the [BlackRoad OS](https://blackroad.io) ecosystem — [BlackRoad-Hardware](https://github.com/BlackRoad-Hardware)
+
+---
+
+# blackroad-smart-home
+
 Part of [BlackRoad-Hardware](https://github.com/BlackRoad-Hardware) — IoT & hardware intelligence platform.
 
 ## Overview
